@@ -1,4 +1,4 @@
-# Animus Python Client
+# Animus Python Client 🤖
 
 For debugging purposes. Tried with the locomotion and vision modalities.
 
@@ -22,8 +22,8 @@ python3 setup.py install
 
 Just use Python 3.7 and you are good.
 
-## Store the Cyberselves Account Info
-This way the email and password do not appear in this public repository.
+## Store Cyberselves Account
+Write them in environment variables. This way the email and password do not appear in this public repository.
 
 ```
 # Animus Debug Client
