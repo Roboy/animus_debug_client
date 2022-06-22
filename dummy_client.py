@@ -121,6 +121,11 @@ if not open_success:
     log.error("Could not open robot motor modality")
     sys.exit(-1)
 
+open_success = robot.open_modality("proprioception")
+if not open_success:
+    log.error("Could not open robot proprioception modality")
+    sys.exit(-1)
+
 motion_counter = 0
 counter = 0
 pygame.init()

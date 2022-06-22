@@ -4,6 +4,8 @@ For debugging purposes. Tried with the locomotion and vision modalities.
 
 ## Installation
 
+[[Animus Client Library Download](https://animus.cyberanimus.com/dashboard/cyberstore)]
+
 As of the time of writing, the Animus Client library (V3.0.4) requires Python 3.7. 
 
 ### On MacOS X
@@ -23,7 +25,7 @@ python3 setup.py install
 Just use Python 3.7 and you are good.
 
 ## Store Cyberselves Account
-Write them in environment variables. This way the email and password do not appear in this public repository.
+Write the username and password in environment variables. This way the email and password do not appear in this public repository.
 
 ```
 # Animus Debug Client
