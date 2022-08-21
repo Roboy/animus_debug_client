@@ -9,10 +9,11 @@ import time
 import logging
 import pygame
 import os
+import datetime
 
 from rollbody_utils import make_motor_cmd, send_motor_cmd
 
-robot_name = "Roboy3"
+robot_name = "rollbody"
 
 log = utils.create_logger("DebugClient", logging.INFO)
 log.info(animus.version)
@@ -67,46 +68,50 @@ if not connected_result.success:
     animus.close_client_interface()
     sys.exit(-1)
 
-# ----------------Motor Loop------------------------------------
+# # ----------------Motor Loop------------------------------------
 
-# open_success = robot.open_modality("motor")
-# #open_success2 = robot.open_modality("vision")
-# if not open_success:
-#     log.error("Could not open robot motor modality")
-#     sys.exit(-1)
+"""
+open_success = robot.open_modality("motor")
+if not open_success:
+    log.error("Could not open robot motor modality")
+    sys.exit(-1)
 
-# # torDict = utils.get_motor_dict()
+screen = pygame.display.set_mode((300, 300))
+pygame.display.set_caption('WindowToRegisterInputs')
+screen.fill((234, 212, 252))
+pygame.display.flip()
 
-# counter = 0
-# pygame.init()
-# clock = pygame.time.Clock()
+counter = 0
+pygame.init()
+clock = pygame.time.Clock()
 
 
-# while True:
+while True:
 
-#     counter += 1
-#     clock.tick(20)
-#     for event in pygame.event.get():
-#         if event.type == pygame.QUIT:
-#             pygame.quit()
-#             quit()
+    counter += 1
+    clock.tick(20)
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            quit()
 
-#     pygame.event.pump() # update the keyboard state in memory
-#     keys = pygame.key.get_pressed()
-#     if keys[pygame.K_LEFT] or keys[pygame.K_a]:
-#         print('key left')
-#         send_motor_cmd(0, -1.)
-#     elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
-#         print('key right')
-#         send_motor_cmd(0, 1.)
-#     elif keys[pygame.K_UP] or keys[pygame.K_w]:
-#         print('key up')
-#         send_motor_cmd(1., 0)
-#     elif keys[pygame.K_DOWN] or keys[pygame.K_s]:
-#         send_motor_cmd(-1., 0)
-#         print('key down')
-#     else:
-#         send_motor_cmd(0., 0.)
+    pygame.event.pump() # update the keyboard state in memory
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT] or keys[pygame.K_a]:
+        print('key left')
+        send_motor_cmd(robot, 0, -1.)
+    elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+        print('key right')
+        send_motor_cmd(robot, 0, 1.)
+    elif keys[pygame.K_UP] or keys[pygame.K_w]:
+        print('key up')
+        send_motor_cmd(robot, 1., 0)
+    elif keys[pygame.K_DOWN] or keys[pygame.K_s]:
+        send_motor_cmd(robot, -1., 0)
+        print('key down')
+    else:
+        send_motor_cmd(robot, 0., 0.)
+"""
 
 # ----------------Motor Visual Loop------------------------------------
 
@@ -125,6 +130,12 @@ open_success = robot.open_modality("proprioception")
 if not open_success:
     log.error("Could not open robot proprioception modality")
     sys.exit(-1)
+
+
+screen = pygame.display.set_mode((300, 300))
+pygame.display.set_caption('WindowToRegisterInputs')
+screen.fill((234, 212, 252))
+pygame.display.flip()
 
 motion_counter = 0
 counter = 0
@@ -151,7 +162,17 @@ try:
             j = cv2.waitKey(1)
             if j == 27:
                 break
+        
+        # PROPRIOCEPTION
+        try:
+            # the backend receives YUV and automatically converts to BRG
+            arr, err = robot.get_modality("proprioception")
+            print(arr)
+        except Exception:
+            print("SOME STUPID ISSUE")
+            continue
 
+        # MOTOR
         clock.tick(20)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
