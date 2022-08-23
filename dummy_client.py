@@ -11,7 +11,7 @@ import pygame
 import os
 import datetime
 
-from rollbody_utils import make_motor_cmd, send_motor_cmd
+from rollbody_utils import make_motor_cmd, send_speed_cmd, send_head_cmd
 
 robot_name = "rollbody"
 
@@ -70,7 +70,6 @@ if not connected_result.success:
 
 # # ----------------Motor Loop------------------------------------
 
-"""
 open_success = robot.open_modality("motor")
 if not open_success:
     log.error("Could not open robot motor modality")
@@ -99,19 +98,24 @@ while True:
     keys = pygame.key.get_pressed()
     if keys[pygame.K_LEFT] or keys[pygame.K_a]:
         print('key left')
-        send_motor_cmd(robot, 0, -1.)
+        send_speed_cmd(robot, 0, -1.)
     elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
         print('key right')
-        send_motor_cmd(robot, 0, 1.)
+        send_speed_cmd(robot, 0, 1.)
     elif keys[pygame.K_UP] or keys[pygame.K_w]:
         print('key up')
-        send_motor_cmd(robot, 1., 0)
+        send_speed_cmd(robot, 1., 0)
     elif keys[pygame.K_DOWN] or keys[pygame.K_s]:
-        send_motor_cmd(robot, -1., 0)
+        send_speed_cmd(robot, -1., 0)
         print('key down')
+    elif keys[pygame.K_u]:
+        send_head_cmd(robot, 1., 0.)
+        print('key u')
+    elif keys[pygame.K_p]:
+        send_head_cmd(robot, 0., 1.)
+        print('key p')
     else:
-        send_motor_cmd(robot, 0., 0.)
-"""
+        send_speed_cmd(robot, 0., 0.)
 
 # ----------------Motor Visual Loop------------------------------------
 
@@ -132,10 +136,10 @@ if not open_success:
     sys.exit(-1)
 
 
-screen = pygame.display.set_mode((300, 300))
-pygame.display.set_caption('WindowToRegisterInputs')
-screen.fill((234, 212, 252))
-pygame.display.flip()
+# screen = pygame.display.set_mode((300, 300))
+# pygame.display.set_caption('WindowToRegisterInputs')
+# screen.fill((234, 212, 252))
+# pygame.display.flip()
 
 motion_counter = 0
 counter = 0
@@ -167,7 +171,7 @@ try:
         try:
             # the backend receives YUV and automatically converts to BRG
             arr, err = robot.get_modality("proprioception")
-            print(arr)
+            #print(arr)
         except Exception:
             print("SOME STUPID ISSUE")
             continue
@@ -183,18 +187,24 @@ try:
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             print('key left')
-            send_motor_cmd(robot, 0, -1.)
+            send_speed_cmd(robot, 0, -1.)
         elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
             print('key right')
-            send_motor_cmd(robot, 0, 1.)
+            send_speed_cmd(robot, 0, 1.)
         elif keys[pygame.K_UP] or keys[pygame.K_w]:
             print('key up')
-            send_motor_cmd(robot, 1., 0)
+            send_speed_cmd(robot, 1., 0)
         elif keys[pygame.K_DOWN] or keys[pygame.K_s]:
-            send_motor_cmd(robot, -1., 0)
+            send_speed_cmd(robot, -1., 0)
             print('key down')
+        elif keys[pygame.K_u]:
+            send_head_cmd(robot, 1., 0.)
+            print('key u')
+        elif keys[pygame.K_p]:
+            send_head_cmd(robot, 0., 1.)
+            print('key p')
         else:
-            send_motor_cmd(robot, 0., 0.)
+            send_speed_cmd(robot, 0., 0.)
 
 except KeyboardInterrupt:
     cv2.destroyAllWindows()
