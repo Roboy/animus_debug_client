@@ -1,6 +1,6 @@
 # Animus Python Client 🤖
 
-For debugging purposes. Tried with the locomotion and vision modalities.
+For debugging purposes. Tried with the locomotion, proprioception and vision modalities.
 
 ## Installation
 
@@ -32,3 +32,7 @@ Write the username and password in environment variables. This way the email and
 export CYBERSELVES_EMAIL="your_email"
 export CYBERSELVES_PWD="your_password"
 ```
+
+## Usage
+
+This code is tailored to the Rollbody robot, but easy to adapt to other robots. Just follow the example in `animus_debug_client/dummy_client.py`. The documentation PDF provided on the Cyberselves website can help too.
