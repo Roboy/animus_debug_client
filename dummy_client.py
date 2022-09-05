@@ -10,8 +10,10 @@ import logging
 import pygame
 import os
 import datetime
+import os
 
 from rollbody_utils import make_motor_cmd, send_speed_cmd, send_head_cmd
+
 
 robot_name = "rollbody"
 
@@ -70,6 +72,7 @@ if not connected_result.success:
 
 # # ----------------Motor Loop------------------------------------
 
+"""
 open_success = robot.open_modality("motor")
 if not open_success:
     log.error("Could not open robot motor modality")
@@ -109,13 +112,15 @@ while True:
         send_speed_cmd(robot, -1., 0)
         print('key down')
     elif keys[pygame.K_u]:
-        send_head_cmd(robot, 1., 0.)
+        send_head_cmd(robot, 1.)
         print('key u')
     elif keys[pygame.K_p]:
-        send_head_cmd(robot, 0., 1.)
+        send_head_cmd(robot, -1.)
         print('key p')
     else:
         send_speed_cmd(robot, 0., 0.)
+"""
+
 
 # ----------------Motor Visual Loop------------------------------------
 
@@ -135,7 +140,6 @@ if not open_success:
     log.error("Could not open robot proprioception modality")
     sys.exit(-1)
 
-
 # screen = pygame.display.set_mode((300, 300))
 # pygame.display.set_caption('WindowToRegisterInputs')
 # screen.fill((234, 212, 252))
@@ -146,36 +150,70 @@ counter = 0
 pygame.init()
 clock = pygame.time.Clock()
 
-cv2.namedWindow("RobotView")
+compr_factor = 1
+n = 0
+
 
 try:
     while True:
-        # Get vision data
-        try:
-            # the backend receives YUV and automatically converts to BRG
-            image_list, err = robot.get_modality("vision", True)
-        except Exception:
-            print("SOME STUPID ISSUE")
-            continue
-        if err.success:
+        n += 1
 
-            # Process vision data if any returned
-            myim = image_list[0].image
-            # cv2.cvtColor(myim, cv2.COLOR_RGB2BGR, myim)
-            cv2.imshow("RobotView", myim)
-            j = cv2.waitKey(1)
-            if j == 27:
-                break
-        
         # PROPRIOCEPTION
         try:
-            # the backend receives YUV and automatically converts to BRG
             arr, err = robot.get_modality("proprioception")
+            if err.success:
+                compr_factor = arr[1]
             #print(arr)
-        except Exception:
-            print("SOME STUPID ISSUE")
+        except Exception as e:
+            print("SOME PROPRIOCEPTION ISSUE", e)
             continue
 
+        # VISION
+        try:
+            # the backend receives YUV and automatically converts to BRG
+            image_list, err = robot.get_modality("vision", True)    # returns a list object
+        except Exception as e:
+            print("SOME VISION ISSUE", e)
+            continue
+        if err.success:
+            # cv2.cvtColor(myim, cv2.COLOR_RGB2BGR, myim)
+
+            print("shapes")
+            for img in image_list:
+                print(img.image.shape)
+            
+            try:
+                if len(image_list) in [1, 2]:
+                    cv2.imshow("LeftCam", image_list[0].image)
+                    cv2.imwrite(f"imgs/{n}.jpg", image_list[0].image)
+                elif len(image_list) in [9, 18]:
+                    # undo patch compr
+                    resize = lambda x: cv2.resize(x, (int(x.shape[1]*compr_factor), int(x.shape[0]*compr_factor)))    # W,H
+                    # stack horizontally
+                    img_above_fov = resize(image_list[1].image)
+                    row1 = np.concatenate((resize(image_list[0].image), 
+                                            img_above_fov,
+                                            resize(image_list[2].image)), axis=1)
+                    img_left_fov = resize(image_list[3].image)
+                    fov = image_list[4].image[:img_left_fov.shape[0], :img_above_fov.shape[1], :]
+                    print(img_above_fov.shape, img_left_fov.shape, fov.shape)
+                    row2 = np.concatenate((img_left_fov, 
+                                            fov,
+                                            resize(image_list[5].image)), axis=1)
+                    row3 = np.concatenate((resize(image_list[6].image), 
+                                            resize(image_list[7].image),
+                                            resize(image_list[8].image)), axis=1)
+                    # stack vertically
+                    img = np.concatenate((row1, row2, row3), axis=0)
+
+                    cv2.imshow("Patch Compressed", img)
+                
+                j = cv2.waitKey(1)
+                if j == 27:
+                    break
+            except Exception as e:
+                print(e)
+                
         # MOTOR
         clock.tick(20)
         for event in pygame.event.get():
@@ -198,10 +236,10 @@ try:
             send_speed_cmd(robot, -1., 0)
             print('key down')
         elif keys[pygame.K_u]:
-            send_head_cmd(robot, 1., 0.)
+            send_head_cmd(robot, 1.)
             print('key u')
         elif keys[pygame.K_p]:
-            send_head_cmd(robot, 0., 1.)
+            send_head_cmd(robot, -1.)
             print('key p')
         else:
             send_speed_cmd(robot, 0., 0.)
